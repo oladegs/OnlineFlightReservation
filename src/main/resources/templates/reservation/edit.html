@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Reservation - Flight Reservation System</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --primary-color: #212529;
+        --secondary-color: #6c757d;
+        --accent-color: #495057;
+        --light-bg: #f8f9fa;
+        --dark-bg: #343a40;
+      }
+
+      body {
+        background-color: var(--light-bg);
+        color: var(--primary-color);
+      }
+
+      .navbar-dark {
+        background-color: var(--primary-color) !important;
+      }
+
+      .card {
+        border: 1px solid var(--accent-color);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-header {
+        background-color: var(--dark-bg);
+        color: white;
+        border-bottom: 1px solid var(--accent-color);
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+      }
+
+      .btn-primary:hover {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+      }
+
+      .flight-info {
+        background-color: var(--dark-bg);
+        color: white;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 2rem;
+      }
+
+      .footer {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 2rem 0;
+        margin-top: 4rem;
+      }
+
+      .form-control.is-invalid {
+        border-color: #dc3545;
+      }
+
+      .invalid-feedback {
+        display: block;
+        color: #dc3545;
+        font-size: 0.875em;
+        margin-top: 0.25rem;
+      }
+
+      .price-summary {
+        background-color: #f8f9fa;
+        border: 1px solid var(--accent-color);
+        border-radius: 0.375rem;
+        padding: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/">
+          <i class="bi bi-airplane"></i> FlightReserve
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/reservations">My Reservations</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/profile">Profile</a>
+            </li>
+          </ul>
+
+          <ul class="navbar-nav align-items-center">
+            <li
+              class="nav-item me-2 text-white-50"
+              th:text="${session.email}"
+            ></li>
+            <li class="nav-item">
+              <form th:action="@{/auth/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-outline-light btn-sm">
+                  <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-4">
+      <!-- Flight Information -->
+      <div class="flight-info">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <h5
+              class="mb-1 airline-name-with-logo"
+              th:attr="data-airline=${reservation.flight.airlineName}"
+            >
+              <span th:text="${reservation.flight.airlineName}"></span>
+            </h5>
+            <p class="mb-0">
+              <i class="bi bi-geo-alt"></i>
+              <span th:text="${reservation.flight.origin}"></span>
+              <i class="bi bi-arrow-right mx-2"></i>
+              <i class="bi bi-geo-alt-fill"></i>
+              <span th:text="${reservation.flight.destination}"></span>
+            </p>
+          </div>
+          <div class="col-md-4 text-md-end">
+            <div
+              class="h4 mb-0"
+              th:text="'$' + ${#numbers.formatDecimal(reservation.flight.price, 1, 2)}"
+            ></div>
+            <small>per adult</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Form -->
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="bi bi-pencil"></i> Edit Reservation
+              </h5>
+            </div>
+            <div class="card-body">
+              <form
+                th:action="@{|/reservations/${reservation.reservationId}|}"
+                method="post"
+              >
+                <div class="row">
+                  <!-- Adult Passengers -->
+                  <div class="col-md-6 mb-3">
+                    <label for="adultPassengers" class="form-label">
+                      <i class="bi bi-person"></i> Adults
+                    </label>
+                    <select
+                      class="form-select"
+                      id="adultPassengers"
+                      name="adultPassengers"
+                      required
+                    >
+                      <option value="0">0</option>
+                      <option
+                        value="1"
+                        th:selected="${reservation.numberOfPassengers == 1}"
+                      >
+                        1
+                      </option>
+                      <option
+                        value="2"
+                        th:selected="${reservation.numberOfPassengers == 2}"
+                      >
+                        2
+                      </option>
+                      <option
+                        value="3"
+                        th:selected="${reservation.numberOfPassengers == 3}"
+                      >
+                        3
+                      </option>
+                      <option
+                        value="4"
+                        th:selected="${reservation.numberOfPassengers == 4}"
+                      >
+                        4
+                      </option>
+                      <option
+                        value="5"
+                        th:selected="${reservation.numberOfPassengers == 5}"
+                      >
+                        5
+                      </option>
+                      <option
+                        value="6"
+                        th:selected="${reservation.numberOfPassengers == 6}"
+                      >
+                        6
+                      </option>
+                      <option
+                        value="7"
+                        th:selected="${reservation.numberOfPassengers == 7}"
+                      >
+                        7
+                      </option>
+                      <option
+                        value="8"
+                        th:selected="${reservation.numberOfPassengers == 8}"
+                      >
+                        8
+                      </option>
+                      <option
+                        value="9"
+                        th:selected="${reservation.numberOfPassengers == 9}"
+                      >
+                        9
+                      </option>
+                    </select>
+                  </div>
+
+                  <!-- Children Passengers -->
+                  <div class="col-md-6 mb-3">
+                    <label for="childPassengers" class="form-label">
+                      <i class="bi bi-person-badge"></i> Children
+                    </label>
+                    <select
+                      class="form-select"
+                      id="childPassengers"
+                      name="childPassengers"
+                      required
+                    >
+                      <option value="0" selected>0</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                      <option value="6">6</option>
+                      <option value="7">7</option>
+                      <option value="8">8</option>
+                      <option value="9">9</option>
+                    </select>
+                  </div>
+
+                  <!-- Total Number of Passengers (read-only) -->
+                  <div class="col-md-12 mb-3">
+                    <label for="numberOfPassengers" class="form-label">
+                      <i class="bi bi-people"></i> Total Passengers
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="numberOfPassengers"
+                      name="numberOfPassengers"
+                      readonly
+                      th:value="${reservation.numberOfPassengers}"
+                    />
+                    <small class="text-muted"
+                      >Automatically calculated from Adults + Children</small
+                    >
+                  </div>
+                </div>
+
+                <!-- Error Alert -->
+                <div
+                  th:if="${error}"
+                  class="alert alert-danger alert-dismissible fade show"
+                  role="alert"
+                >
+                  <i class="bi bi-exclamation-triangle"></i>
+                  <span th:text="${error}"></span>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"
+                  ></button>
+                </div>
+
+                <div class="mb-3">
+                  <label for="departureTime" class="form-label">
+                    <i class="bi bi-clock"></i> Departure Time
+                  </label>
+                  <select
+                    class="form-select"
+                    id="departureTime"
+                    name="departureTime"
+                    required
+                  >
+                    <option value="">Choose departure time...</option>
+                    <option
+                      th:each="time : ${departureTimes}"
+                      th:value="${#temporals.format(time, 'yyyy-MM-dd HH:mm:ss')}"
+                      th:selected="${#temporals.format(reservation.flight.departureTime, 'yyyy-MM-dd HH:mm:ss')} == ${#temporals.format(time, 'yyyy-MM-dd HH:mm:ss')}"
+                      th:text="${#temporals.format(time, 'MMM dd, yyyy HH:mm')}"
+                    ></option>
+                  </select>
+                  <small class="text-muted"
+                    >The departure date will be automatically updated based on
+                    your selection.</small
+                  >
+                </div>
+
+                <!-- Hidden Departure Date field (auto-updated from departure time, used internally only) -->
+                <input
+                  type="hidden"
+                  id="departureDate"
+                  th:value="${#temporals.format(reservation.departureDate,'yyyy-MM-dd')}"
+                />
+
+                <!-- Hidden fields preserved by controller lookup -->
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <a href="/reservations" class="btn btn-secondary me-md-2">
+                    <i class="bi bi-x-circle"></i> Cancel
+                  </a>
+                  <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Save Changes
+                  </button>
+                </div>
+              </form>
+              <!-- Update and go to checkout -->
+              <form
+                th:action="@{|/reservations/${reservation.reservationId}/update-and-pay|}"
+                method="post"
+                class="mt-2"
+                id="payForm"
+              >
+                <input
+                  type="hidden"
+                  name="adultPassengers"
+                  id="payAdultPassengers"
+                />
+                <input
+                  type="hidden"
+                  name="childPassengers"
+                  id="payChildPassengers"
+                />
+                <input
+                  type="hidden"
+                  name="numberOfPassengers"
+                  id="payPassengers"
+                />
+                <input
+                  type="hidden"
+                  name="departureTime"
+                  id="payDepartureTime"
+                  th:value="${#temporals.format(reservation.flight.departureTime,'yyyy-MM-dd HH:mm:ss')}"
+                />
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-credit-card"></i> Proceed to Checkout
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Price Summary -->
+        <div class="col-lg-4">
+          <div class="price-summary">
+            <h6 class="mb-3">
+              <i class="bi bi-calculator"></i> Updated Price Summary
+            </h6>
+
+            <div class="d-flex justify-content-between mb-2">
+              <span
+                >Passengers (<span
+                  id="passengerCount"
+                  th:text="${reservation.numberOfPassengers}"
+                ></span
+                >x)</span
+              >
+              <span
+                id="passengerTotal"
+                th:text="'$' + ${#numbers.formatDecimal(reservation.flight.price * reservation.numberOfPassengers, 1, 2)}"
+              ></span>
+            </div>
+
+            <hr />
+
+            <div class="d-flex justify-content-between">
+              <strong>New Total</strong>
+              <strong
+                id="newTotal"
+                th:text="'$' + ${#numbers.formatDecimal(reservation.totalPrice, 1, 2)}"
+              ></strong>
+            </div>
+
+            <div class="mt-3">
+              <small class="text-muted">
+                <i class="bi bi-info-circle"></i>
+                Price will be recalculated based on your changes.
+              </small>
+            </div>
+          </div>
+
+          <!-- Important Notice -->
+          <div class="card mt-3">
+            <div class="card-header">
+              <h6 class="mb-0">
+                <i class="bi bi-info-circle"></i> Important Notice
+              </h6>
+            </div>
+            <div class="card-body">
+              <small class="text-muted">
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-2">
+                    <i class="bi bi-exclamation-triangle text-warning"></i>
+                    Changes may affect availability
+                  </li>
+                  <li class="mb-2">
+                    <i class="bi bi-exclamation-triangle text-warning"></i>
+                    Price difference will be charged/refunded
+                  </li>
+                  <li class="mb-0">
+                    <i class="bi bi-clock text-info"></i>
+                    Cancellation policy still applies
+                  </li>
+                </ul>
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            <h5><i class="bi bi-airplane"></i> FlightReserve</h5>
+            <p>Your trusted partner for flight reservations worldwide.</p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <p>Designed by Farouk Oladega for Enterprise Java, Assignment 2</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Airline Logo Utility -->
+    <script src="/js/airline-logo.js"></script>
+
+    <script th:inline="javascript">
+      // Calculate total passengers from adults and children
+      function updateTotalPassengers() {
+        const adultSelect = document.getElementById("adultPassengers");
+        const childSelect = document.getElementById("childPassengers");
+        const totalInput = document.getElementById("numberOfPassengers");
+
+        if (!adultSelect || !childSelect || !totalInput) return;
+
+        const adults = parseInt(adultSelect.value) || 0;
+        const children = parseInt(childSelect.value) || 0;
+        const total = adults + children;
+
+        totalInput.value = total > 0 ? total : 0;
+        updatePriceSummary();
+      }
+
+      // Update price summary when passenger count changes
+      function updatePriceSummary() {
+        const totalInput = document.getElementById("numberOfPassengers");
+        const passengerCount = parseInt(totalInput.value) || 1;
+        const price = /*[[${reservation.flight.price}]]*/ 0;
+        const initialTotal = /*[[${reservation.totalPrice}]]*/ 0;
+        const saveBtn = document.querySelector("button.btn.btn-primary");
+
+        const newTotal = Number(passengerCount) * Number(price);
+
+        // Update displays
+        document.getElementById("passengerCount").textContent = passengerCount;
+        document.getElementById("passengerTotal").textContent =
+          "$" + (Number(passengerCount) * Number(price)).toFixed(2);
+
+        document.getElementById("newTotal").textContent =
+          "$" + Number(newTotal).toFixed(2);
+
+        // Rule: if new total increases vs initial, disable Save (must proceed to checkout)
+        if (Number(newTotal) > Number(initialTotal)) {
+          if (saveBtn) {
+            saveBtn.setAttribute("disabled", "disabled");
+            saveBtn.classList.add("disabled", "btn-secondary");
+            saveBtn.classList.remove("btn-primary");
+            saveBtn.title =
+              "Price increased. Please proceed to checkout to pay the difference.";
+          }
+        } else {
+          if (saveBtn) {
+            saveBtn.removeAttribute("disabled");
+            saveBtn.classList.remove("disabled", "btn-secondary");
+            saveBtn.classList.add("btn-primary");
+            saveBtn.title = "";
+          }
+        }
+      }
+
+      // Auto-update departure date when departure time changes
+      function updateDepartureDate() {
+        const departureTimeSelect = document.getElementById("departureTime");
+        const departureDateInput = document.getElementById("departureDate");
+        const payDepartureTimeInput =
+          document.getElementById("payDepartureTime");
+
+        if (departureTimeSelect && departureTimeSelect.value) {
+          // Parse the selected departure time value (format: yyyy-MM-dd HH:mm:ss)
+          const selectedValue = departureTimeSelect.value;
+          // Extract date part (first 10 characters: yyyy-MM-dd)
+          const datePart = selectedValue.substring(0, 10);
+
+          // Update hidden departure date field
+          if (departureDateInput) {
+            departureDateInput.value = datePart;
+          }
+
+          // Update hidden field for checkout form
+          if (payDepartureTimeInput) {
+            payDepartureTimeInput.value = selectedValue;
+          }
+        }
+      }
+
+      const adultSelect = document.getElementById("adultPassengers");
+      const childSelect = document.getElementById("childPassengers");
+
+      if (adultSelect) {
+        adultSelect.addEventListener("change", updateTotalPassengers);
+      }
+      if (childSelect) {
+        childSelect.addEventListener("change", updateTotalPassengers);
+      }
+
+      // Initialize on page load - set adults to total if not set, children to 0
+      (function () {
+        const initialTotal = /*[[${reservation.numberOfPassengers}]]*/ 1;
+        const adultSelect = document.getElementById("adultPassengers");
+        const childSelect = document.getElementById("childPassengers");
+
+        if (adultSelect && childSelect && initialTotal > 0) {
+          // Set adults to the total, children to 0 (as default split)
+          if (initialTotal <= 9) {
+            adultSelect.value = initialTotal;
+            childSelect.value = 0;
+          } else {
+            adultSelect.value = 9;
+            childSelect.value = Math.max(0, initialTotal - 9);
+          }
+        }
+        updateTotalPassengers();
+      })();
+
+      document
+        .getElementById("departureTime")
+        .addEventListener("change", updateDepartureDate);
+
+      // Keep hidden fields in sync before proceeding to checkout
+      (function () {
+        const numInput = document.getElementById("numberOfPassengers");
+        const departureTimeSelect = document.getElementById("departureTime");
+        const payForm = document.getElementById("payForm");
+        const payPassengers = document.getElementById("payPassengers");
+        const payDepartureTime = document.getElementById("payDepartureTime");
+
+        // Keep hidden fields in sync before proceeding to checkout
+        if (payForm) {
+          payForm.addEventListener("submit", function () {
+            const adultSelect = document.getElementById("adultPassengers");
+            const childSelect = document.getElementById("childPassengers");
+            const totalInput = document.getElementById("numberOfPassengers");
+
+            if (adultSelect && childSelect && totalInput) {
+              payAdultPassengers.value = adultSelect.value;
+              payChildPassengers.value = childSelect.value;
+              payPassengers.value = totalInput.value;
+            }
+
+            if (departureTimeSelect && departureTimeSelect.value) {
+              payDepartureTime.value = departureTimeSelect.value;
+            }
+          });
+        }
+
+        // Also sync on form submit for the main form
+        const mainForm = document.querySelector(
+          'form[th\\:action*="/reservations/"]'
+        );
+        if (mainForm) {
+          mainForm.addEventListener("submit", function () {
+            updateDepartureDate();
+          });
+        }
+
+        numInput.addEventListener("input", function () {
+          updatePriceSummary();
+        });
+
+        // Initialize on page load
+        updateDepartureDate();
+        updatePriceSummary();
+      })();
+    </script>
+  </body>
+</html>

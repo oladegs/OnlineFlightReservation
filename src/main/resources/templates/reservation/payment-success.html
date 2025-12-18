@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Successful - Flight Reservation System</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --primary-color: #212529;
+        --secondary-color: #6c757d;
+        --accent-color: #495057;
+        --light-bg: #f8f9fa;
+        --dark-bg: #343a40;
+      }
+
+      body {
+        background-color: var(--light-bg);
+        color: var(--primary-color);
+      }
+
+      .navbar-dark {
+        background-color: var(--primary-color) !important;
+      }
+
+      .card {
+        border: 1px solid var(--accent-color);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-header {
+        background-color: var(--dark-bg);
+        color: white;
+        border-bottom: 1px solid var(--accent-color);
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+      }
+
+      .btn-primary:hover {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+      }
+
+      .footer {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 2rem 0;
+        margin-top: 4rem;
+      }
+
+      .success-section {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 3rem 0;
+        text-align: center;
+      }
+
+      .confirmation-card {
+        border: 2px solid #28a745;
+        box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+      }
+
+      .confirmation-header {
+        background-color: #28a745;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/">
+          <i class="bi bi-airplane"></i> FlightReserve
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/reservations/search">Search Flights</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/reservations">My Reservations</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/profile">Profile</a>
+            </li>
+          </ul>
+
+          <ul class="navbar-nav align-items-center">
+            <li
+              class="nav-item me-2 text-white-50"
+              th:text="${session.email}"
+            ></li>
+            <li class="nav-item">
+              <form th:action="@{/auth/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-outline-light btn-sm">
+                  <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Success Section -->
+    <section class="success-section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-6 text-center">
+            <i
+              class="bi bi-check-circle-fill"
+              style="font-size: 4rem; margin-bottom: 1rem"
+            ></i>
+            <h1 class="display-4 fw-bold mb-3">Payment Successful!</h1>
+            <p class="lead mb-4">
+              Your flight reservation has been confirmed and payment processed
+              successfully.
+            </p>
+            <div class="row g-3 justify-content-center">
+              <div class="col-auto">
+                <a href="/reservations" class="btn btn-light btn-lg">
+                  <i class="bi bi-calendar-check"></i> View Reservations
+                </a>
+              </div>
+              <div class="col-auto">
+                <a
+                  href="/reservations/search"
+                  class="btn btn-outline-light btn-lg"
+                >
+                  <i class="bi bi-search"></i> Book Another Flight
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container py-4">
+      <!-- Confirmation Details -->
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="card confirmation-card">
+            <div class="card-header confirmation-header">
+              <h5 class="mb-0">
+                <i class="bi bi-ticket-perforated"></i> Reservation Confirmed
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <h6>Reservation Details</h6>
+                  <p class="mb-1">
+                    <strong>Reservation ID:</strong>
+                    <span th:text="${reservation.reservationId}"></span>
+                  </p>
+                  <p class="mb-1">
+                    <strong>Status:</strong>
+                    <span
+                      class="badge bg-success"
+                      th:text="${reservation.status}"
+                    ></span>
+                  </p>
+                  <p class="mb-0">
+                    <strong>Booking Date:</strong>
+                    <span
+                      th:text="${#temporals.format(reservation.bookingDate, 'yyyy-MM-dd')}"
+                    ></span>
+                  </p>
+                </div>
+                <div class="col-md-6">
+                  <h6>Payment Details</h6>
+                  <p class="mb-1">
+                    <strong>Payment Method:</strong>
+                    <span th:text="${paymentMethod}"></span>
+                  </p>
+                  <p class="mb-1">
+                    <strong>Amount Paid:</strong>
+                    <span
+                      th:text="'$' + ${#numbers.formatDecimal(reservation.totalPrice, 1, 2)}"
+                    ></span>
+                  </p>
+                  <p class="mb-0">
+                    <strong>Transaction Date:</strong>
+                    <span
+                      th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm')}"
+                    ></span>
+                  </p>
+                </div>
+              </div>
+
+              <hr />
+
+              <div class="row">
+                <div class="col-md-6">
+                  <h6>Flight Information</h6>
+                  <p class="mb-1">
+                    <strong
+                      class="airline-name-with-logo"
+                      th:attr="data-airline=${reservation.flight.airlineName}"
+                    >
+                      <span th:text="${reservation.flight.airlineName}"></span>
+                    </strong>
+                  </p>
+                  <p class="mb-1">
+                    <i class="bi bi-geo-alt"></i>
+                    <span th:text="${reservation.flight.origin}"></span>
+                    <i class="bi bi-arrow-right mx-2"></i>
+                    <span th:text="${reservation.flight.destination}"></span>
+                  </p>
+                  <p class="mb-1">
+                    <i class="bi bi-calendar"></i>
+                    <span
+                      th:text="${#temporals.format(reservation.departureDate, 'yyyy-MM-dd')}"
+                    ></span>
+                  </p>
+                  <p class="mb-0">
+                    <i class="bi bi-clock"></i>
+                    <span
+                      th:text="${#temporals.format(reservation.flight.departureTime, 'HH:mm')}"
+                    ></span>
+                    -
+                    <span
+                      th:text="${#temporals.format(reservation.flight.arrivalTime, 'HH:mm')}"
+                    ></span>
+                  </p>
+                </div>
+                <div class="col-md-6">
+                  <h6>Passenger Information</h6>
+                  <p class="mb-1">
+                    <strong>Number of Passengers:</strong>
+                    <span th:text="${reservation.numberOfPassengers}"></span>
+                  </p>
+                  <p class="mb-0">
+                    <strong>Total Price:</strong>
+                    <span
+                      th:text="'$' + ${#numbers.formatDecimal(reservation.totalPrice, 1, 2)}"
+                    ></span>
+                  </p>
+                </div>
+              </div>
+
+              <div class="alert alert-info mt-4" role="alert">
+                <i class="bi bi-info-circle"></i>
+                <strong>Important:</strong> A confirmation email has been sent
+                to your registered email address. Please keep this reservation
+                ID for your records.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            <h5><i class="bi bi-airplane"></i> FlightReserve</h5>
+            <p>Your trusted partner for flight reservations worldwide.</p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <p>Designed by Farouk Oladega for Enterprise Java, Assignment 2</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Airline Logo Utility -->
+    <script src="/js/airline-logo.js"></script>
+  </body>
+</html>

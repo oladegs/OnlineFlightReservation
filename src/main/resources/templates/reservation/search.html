@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search Flights - Flight Reservation System</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <!-- Custom Styles -->
+    <link rel="stylesheet" th:href="@{/styles.css}" />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/">
+          <i class="bi bi-airplane"></i> FlightReserve
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="/reservations/search"
+                >Search Flights</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/reservations">My Reservations</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/profile">Profile</a>
+            </li>
+          </ul>
+
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <form th:action="@{/auth/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-outline-light btn-sm">
+                  <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Search Section -->
+    <section class="search-form">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <h2 class="text-center mb-4">
+              <i class="bi bi-search"></i> Find Your Perfect Flight
+            </h2>
+            <form th:action="@{/reservations/search}" method="post">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label for="origin" class="form-label">From</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="origin"
+                    name="origin"
+                    placeholder="Departure city"
+                  />
+                </div>
+                <div class="col-md-4">
+                  <label for="destination" class="form-label">To</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="destination"
+                    name="destination"
+                    placeholder="Destination city"
+                  />
+                </div>
+                <div class="col-md-4">
+                  <label for="departureDate" class="form-label"
+                    >Departure Date</label
+                  >
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="departureDate"
+                    name="departureDate"
+                    th:min="${#dates.format(#dates.createToday(), 'yyyy-MM-dd')}"
+                  />
+                </div>
+              </div>
+              <div class="text-center mt-4">
+                <button type="submit" class="btn btn-light btn-lg">
+                  <i class="bi bi-search"></i> Search Flights
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Available Flights -->
+    <section class="py-5">
+      <div class="container">
+        <h3 class="mb-4">Available Flights</h3>
+        <div class="row">
+          <div th:each="flight : ${flights}" class="col-lg-6 mb-4">
+            <div class="card h-100">
+              <div
+                class="card-header d-flex justify-content-between align-items-center"
+              >
+                <h5
+                  class="mb-0 airline-name-with-logo"
+                  th:attr="data-airline=${flight.airlineName}"
+                >
+                  <span th:text="${flight.airlineName}"></span>
+                </h5>
+                <span
+                  class="badge bg-primary"
+                  th:text="${flight.flightId}"
+                ></span>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6>Route</h6>
+                    <p class="mb-2">
+                      <i class="bi bi-geo-alt"></i>
+                      <span th:text="${flight.origin}"></span>
+                      <i class="bi bi-arrow-right mx-2"></i>
+                      <i class="bi bi-geo-alt-fill"></i>
+                      <span th:text="${flight.destination}"></span>
+                    </p>
+                    <h6>Schedule</h6>
+                    <p class="mb-2">
+                      <i class="bi bi-calendar"></i>
+                      <span
+                        th:text="${#temporals.format(flight.departureTime, 'yyyy-MM-dd HH:mm')}"
+                      ></span>
+                    </p>
+                    <p class="mb-0">
+                      <i class="bi bi-clock"></i>
+                      <span
+                        th:text="${#temporals.format(flight.arrivalTime, 'yyyy-MM-dd HH:mm')}"
+                      ></span>
+                    </p>
+                  </div>
+                  <div class="col-md-6 text-md-end">
+                    <h4
+                      class="text-primary mb-3"
+                      th:text="'$' + ${#numbers.formatDecimal(flight.price, 1, 2)}"
+                    ></h4>
+                    <a
+                      th:href="@{/reservations/new(flightId=${flight.flightId})}"
+                      class="btn btn-primary"
+                    >
+                      <i class="bi bi-bookmark-plus"></i> Book Now
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            <h5><i class="bi bi-airplane"></i> FlightReserve</h5>
+            <p>Your trusted partner for flight reservations worldwide.</p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <p>Designed by Farouk Oladega for Enterprise Java, Assignment 2</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Airline Logo Utility -->
+    <script src="/js/airline-logo.js"></script>
+  </body>
+</html>

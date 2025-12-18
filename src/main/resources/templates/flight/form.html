@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<h3 th:text="${flight.flightId == null ? 'New Flight' : 'Edit Flight'}"></h3>
+<form th:action="${flight.flightId == null} ? @{/flights} : @{'/flights/' + ${flight.flightId}}"
+      th:object="${flight}" method="post">
+  <div>Airline: <input th:field="*{airlineName}"/></div>
+  <div>Origin: <input th:field="*{origin}"/></div>
+  <div>Destination: <input th:field="*{destination}"/></div>
+  <div>Departure: <input th:field="*{departureTime}" type="datetime-local"/></div>
+  <div>Arrival: <input th:field="*{arrivalTime}" type="datetime-local"/></div>
+  <div>Price: <input th:field="*{price}" type="number" step="0.01" min="0.01"/></div>
+  <button type="submit">Save</button>
+</form>
+</body>
+</html>

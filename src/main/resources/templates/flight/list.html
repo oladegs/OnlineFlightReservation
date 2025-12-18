@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<h3>Flights</h3>
+<p><a th:href="@{/}">Home</a> | <a th:href="@{/flights/new}">Add Flight</a></p>
+<table border="1">
+  <tr><th>Airline</th><th>From</th><th>To</th><th>Dep</th><th>Arr</th><th>Price</th><th></th></tr>
+  <tr th:each="f : ${flights}">
+    <td th:text="${f.airlineName}"></td>
+    <td th:text="${f.origin}"></td>
+    <td th:text="${f.destination}"></td>
+    <td th:text="${#temporals.format(f.departureTime,'yyyy-MM-dd HH:mm')}"></td>
+    <td th:text="${#temporals.format(f.arrivalTime,'yyyy-MM-dd HH:mm')}"></td>
+    <td th:text="${f.price}"></td>
+    <td>
+      <a th:href="@{|/reservations/new?flightId=${f.flightId}|}">Reserve</a> |
+      <a th:href="@{|/flights/${f.flightId}/edit|}">Edit</a>
+      <form th:action="@{|/flights/${f.flightId}/delete|}" method="post" style="display:inline">
+        <button type="submit">Delete</button>
+      </form>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

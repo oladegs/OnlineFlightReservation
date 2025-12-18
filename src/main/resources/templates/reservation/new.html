@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Flight - Flight Reservation System</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <!-- Custom Styles -->
+    <link rel="stylesheet" th:href="@{/styles.css}" />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/">
+          <i class="bi bi-airplane"></i> FlightReserve
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/reservations">My Reservations</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/profile">Profile</a>
+            </li>
+          </ul>
+
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <form th:action="@{/auth/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-outline-light btn-sm">
+                  <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+      <div class="row">
+        <div class="col-12">
+          <h2 class="mb-4">
+            <i class="bi bi-airplane-takeoff"></i> Book Flight
+          </h2>
+
+          <!-- Flight Information -->
+          <div class="flight-info" th:if="${flight}">
+            <div class="row">
+              <div class="col-md-6">
+                <h5
+                  class="airline-name-with-logo"
+                  th:attr="data-airline=${flight.airlineName}"
+                >
+                  <span th:text="${flight.airlineName}">Airline</span>
+                </h5>
+                <p class="mb-1">
+                  <strong>From:</strong>
+                  <span th:text="${flight.origin}">Origin</span>
+                </p>
+                <p class="mb-1">
+                  <strong>To:</strong>
+                  <span th:text="${flight.destination}">Destination</span>
+                </p>
+              </div>
+              <div class="col-md-6">
+                <p class="mb-1">
+                  <strong>Departure:</strong>
+                  <span
+                    th:text="${#temporals.format(flight.departureTime, 'MMM dd, yyyy HH:mm')}"
+                    >Departure Time</span
+                  >
+                </p>
+                <p class="mb-1">
+                  <strong>Arrival:</strong>
+                  <span
+                    th:text="${#temporals.format(flight.arrivalTime, 'MMM dd, yyyy HH:mm')}"
+                    >Arrival Time</span
+                  >
+                </p>
+                <p class="mb-0">
+                  <strong>Price:</strong>
+                  <span
+                    class="h5 text-warning"
+                    th:text="'$' + ${#numbers.formatDecimal(flight.price, 1, 2)}"
+                    >$0.00</span
+                  >
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reservation Form -->
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="bi bi-calendar-plus"></i> Reservation Details
+              </h5>
+            </div>
+            <div class="card-body">
+              <form
+                th:action="@{/reservations/new}"
+                th:object="${reservation}"
+                method="post"
+              >
+                <input
+                  type="hidden"
+                  th:field="*{flight.flightId}"
+                  th:value="${flight.flightId}"
+                />
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="departureDate" class="form-label">
+                        <i class="bi bi-calendar"></i> Departure Date
+                      </label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        id="departureDate"
+                        th:field="*{departureDate}"
+                        th:class="${#fields.hasErrors('departureDate')} ? 'form-control is-invalid' : 'form-control'"
+                        required
+                      />
+                      <div
+                        th:if="${#fields.hasErrors('departureDate')}"
+                        class="invalid-feedback"
+                        th:errors="*{departureDate}"
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="numberOfPassengers" class="form-label">
+                        <i class="bi bi-people"></i> Number of Passengers
+                      </label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="numberOfPassengers"
+                        th:field="*{numberOfPassengers}"
+                        th:class="${#fields.hasErrors('numberOfPassengers')} ? 'form-control is-invalid' : 'form-control'"
+                        min="1"
+                        max="10"
+                        required
+                      />
+                      <div
+                        th:if="${#fields.hasErrors('numberOfPassengers')}"
+                        class="invalid-feedback"
+                        th:errors="*{numberOfPassengers}"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Global errors -->
+                <div
+                  th:if="${#fields.hasGlobalErrors()}"
+                  class="alert alert-danger"
+                  role="alert"
+                >
+                  <i class="bi bi-exclamation-triangle"></i>
+                  <div
+                    th:each="e : ${#fields.globalErrors()}"
+                    th:text="${e}"
+                  ></div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <a
+                    href="/reservations/search"
+                    class="btn btn-secondary me-md-2"
+                  >
+                    <i class="bi bi-arrow-left"></i> Back to Search
+                  </a>
+                  <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Review Reservation
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            <h5><i class="bi bi-airplane"></i> FlightReserve</h5>
+            <p>Your trusted partner for flight reservations worldwide.</p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <p>Designed by Farouk Oladega for Enterprise Java, Assignment 2</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Airline Logo Utility -->
+    <script src="/js/airline-logo.js"></script>
+  </body>
+</html>
